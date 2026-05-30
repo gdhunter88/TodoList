@@ -1,21 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
 export default function Home() {
   const [input, setInput] = useState('');
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState(() => {
+    // Check if window is defined (client-side) before accessing localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('todos');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
-  // Load from localStorage on mount
-  useState(() => {
-    const saved = localStorage.getItem('todos');
-    if (saved) setTodos(JSON.parse(saved));
-  }, []);
+  // Save to localStorage whenever todos change
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
 
   const addTodo = () => {
     if (!input.trim()) return;
     const newTodo = { id: Date.now(), text: input.trim(), completed: false };
     setTodos(prev => [...prev, newTodo]);
-    localStorage.setItem('todos', JSON.stringify([...prev, newTodo]));
     setInput('');
   };
 
@@ -23,12 +28,10 @@ export default function Home() {
     setTodos(prev =>
       prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
     );
-    localStorage.setItem('todos', JSON.stringify(prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))));
   };
 
   const deleteTodo = id => {
     setTodos(prev => prev.filter(t => t.id !== id));
-    localStorage.setItem('todos', JSON.stringify(prev.filter(t => t.id !== id)));
   };
 
   return (
