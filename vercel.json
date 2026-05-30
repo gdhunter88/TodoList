@@ -1,6 +1,3 @@
 {
-  "env": {
-    "NPM_CONFIG_REGISTRY": "https://registry.npmjs.org/"
-  },
-  "buildCommand": "npm install --registry=https://registry.npmjs.org/ && next build"
+  "buildCommand": "npm config set registry https://registry.npmjs.org/ && npm install && next build"
 }
